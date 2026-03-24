@@ -1,23 +1,15 @@
-FROM node:20-slim
+FROM agentscope/copaw:latest
 
-# Install necessary system dependencies (optional but safe)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+# Copy your soul file to the expected location (adjust if needed)
+COPY soul.md /app/soul.md
 
-WORKDIR /app
+# Set environment variables (these will be overridden by Render env vars)
+ENV COPAW_SOUL_PATH=/app/soul.md \
+    COPAW_TELEGRAM_BOT_TOKEN="8759630523:AAHnwyR2mJDcSTUKzGaY3R6l7ib1yb0NnBQ" \
+    COPAW_MODEL=gemini \
+    COPAW_GEMINI_API_KEY="AIzaSyC2gbvodoXhjny45QGAxjZNUKorT3WfjXY"
 
-# Install OpenClaw globally
-RUN npm install -g openclaw
+# Expose the port CoPaw uses (default is 8088)
+EXPOSE 8088
 
-# Verify the installation and print the binary path for debugging
-RUN which openclaw  echo "openclaw not found in PATH" && ls -la /usr/local/bin/  true
-
-# Create the configuration directory and copy the soul
-RUN mkdir -p /root/.openclaw
-COPY soul.md /root/.openclaw/SOUL.md
-
-EXPOSE 18789
-
-# Use the full path to the binary
-CMD ["/usr/local/bin/openclaw", "gateway", "run", "--webhook-url", "https://mark-agent.onrender.com"]
+# The base image already defines a CMD; we don't need to override it
